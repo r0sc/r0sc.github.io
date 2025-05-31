@@ -20,13 +20,14 @@ body {
 .profile-header {
   position: fixed;
   top: 0;
+  left: 0;
   width: 100%;
   color: var(--text);
   display: flex;
   justify-content: flex-start;
   align-items: center;
   padding: 0.8rem 1.5rem;
-  z-index: 10;
+  z-index: 100;
   box-sizing: border-box;
   background: transparent;
 }
@@ -370,6 +371,7 @@ body {
     0 0 20px rgba(187, 51, 255, 0.2),
     0 0 30px rgba(187, 51, 255, 0.1);
   position: relative;
+  white-space: nowrap;
 }
 
 .site-title::after {
@@ -661,58 +663,108 @@ body {
 }
 
 .welcome-card {
-  background: var(--bg-dark);
-  padding: 2rem;
-  border-radius: 1rem;
-  text-align: center;
-  border: 1px solid var(--primary);
-  transform-style: preserve-3d;
-  transform: perspective(1000px);
-  transition: all 0.3s ease;
-  box-shadow: 
-    0 0 20px rgba(187, 51, 255, 0.3),
-    0 0 40px rgba(187, 51, 255, 0.2);
-  max-width: 90%;
-  width: 400px;
+  background: #1a1a1a;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
   position: relative;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
 }
 
-.welcome-card::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: 1rem;
-  background: linear-gradient(45deg,
-    var(--primary),
-    #ff33f7,
-    var(--primary-dark),
-    var(--primary)
-  );
-  background-size: 400% 400%;
-  z-index: -1;
-  animation: gradientMove 3s ease infinite;
-  opacity: 0.5;
+.terminal {
+  font-family: 'Consolas', 'Monaco', monospace;
+  background: #1a1a1a;
+  color: #33ff33;
+  border: 1px solid #333;
+  padding: 0;
 }
 
-.welcome-card > * {
-  transform-style: preserve-3d;
-  transform: translateZ(40px);
+.terminal-header {
+  background: #333;
+  padding: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #444;
 }
 
-.welcome-card h2 {
-  color: var(--primary);
-  font-size: 2rem;
+.terminal-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.terminal-button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.terminal-button.close {
+  background: #ff5f56;
+}
+
+.terminal-button.minimize {
+  background: #ffbd2e;
+}
+
+.terminal-button.maximize {
+  background: #27c93f;
+}
+
+.terminal-title {
+  color: #ddd;
+  font-size: 0.9rem;
+}
+
+.terminal-content {
+  padding: 1rem;
+  font-size: 0.95rem;
+}
+
+.terminal-line {
   margin-bottom: 1rem;
-  font-family: 'Orbitron', sans-serif;
-  text-shadow: 
-    0 0 5px rgba(187, 51, 255, 0.3),
-    0 0 10px rgba(187, 51, 255, 0.2);
+  line-height: 1.4;
 }
 
-.welcome-card p {
-  color: var(--text);
-  margin-bottom: 2rem;
-  line-height: 1.6;
+.terminal-line.warning {
+  color: #ff3333;
+  font-weight: bold;
+  padding: 0.5rem;
+  background: rgba(255, 0, 0, 0.1);
+  border-left: 3px solid #ff3333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.terminal-prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prompt-symbol {
+  color: #33ff33;
+}
+
+.terminal-button-command {
+  background: transparent;
+  border: none;
+  color: #33ff33;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.terminal-button-command:hover {
+  color: #66ff66;
+  text-decoration: underline;
 }
 
 .welcome-button {
@@ -758,8 +810,77 @@ body {
   left: 100%;
 }
 
+.main-content {
+  position: relative;
+  min-height: 100vh;
+  transition: filter 0.5s ease;
+}
+
 .content-blur {
   filter: blur(10px);
   pointer-events: none;
-  transition: filter 0.5s ease;
+}
+
+.content-blur.active {
+  filter: none;
+  pointer-events: auto;
+}
+
+.loading-container {
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.loading-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #4a1f66;
+  text-shadow: 0 0 15px rgba(74, 31, 102, 0.8);
+  position: relative;
+  white-space: nowrap;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.loading-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #4a1f66;
+  animation: dotPulse 1.4s infinite;
+  opacity: 0.6;
+  box-shadow: 0 0 8px rgba(74, 31, 102, 0.6);
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
 }

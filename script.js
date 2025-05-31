@@ -148,72 +148,26 @@ class WelcomeScreen {
   constructor() {
     this.overlay = document.querySelector('.welcome-overlay');
     this.content = document.querySelector('.main-content');
-    this.button = document.querySelector('.welcome-button');
+    this.terminalButton = document.querySelector('.terminal-button-command');
     this.card = document.querySelector('.welcome-card');
-    this.mediaPlayer = new MediaPlayer(false); // Initialize but don't autoplay
+    this.mediaPlayer = new MediaPlayer(false);
     
-    this.button.addEventListener('click', () => this.enterSite());
-    this.setupCardEffect();
-  }
-
-  setupCardEffect() {
-    let bounds;
-
-    const rotateCard = (e) => {
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
-      
-      if (!bounds) bounds = this.card.getBoundingClientRect();
-      
-      const leftX = mouseX - bounds.x;
-      const topY = mouseY - bounds.y;
-      const center = {
-        x: bounds.width / 2,
-        y: bounds.height / 2
-      }
-      
-      const distanceX = leftX - center.x;
-      const distanceY = topY - center.y;
-      
-      const rotateX = (-1) * (distanceY / center.y) * 20;
-      const rotateY = (distanceX / center.x) * 20;
-      
-      this.card.style.transform = `
-        perspective(1000px)
-        rotateX(${rotateX}deg)
-        rotateY(${rotateY}deg)
-        scale3d(1.05, 1.05, 1.05)
-      `;
-    };
-
-    this.card.addEventListener('mouseenter', () => {
-      bounds = this.card.getBoundingClientRect();
-      document.addEventListener('mousemove', rotateCard);
-    });
-
-    this.card.addEventListener('mouseleave', () => {
-      document.removeEventListener('mousemove', rotateCard);
-      this.card.style.transform = `
-        perspective(1000px)
-        rotateX(0deg)
-        rotateY(0deg)
-        scale3d(1, 1, 1)
-      `;
-    });
+    this.terminalButton.addEventListener('click', () => this.enterSite());
   }
 
   async enterSite() {
-    // Start playing music immediately
-    await this.mediaPlayer.initializeAudio();
-    this.mediaPlayer.playAudio();
-    
-    // Fade out overlay
+    // Add fade out animation
     this.overlay.style.opacity = '0';
-    this.content.classList.remove('content-blur');
+    this.content.classList.add('active');
     
-    setTimeout(() => {
-      this.overlay.style.display = 'none';
-    }, 500);
+    // Wait for animation to complete
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Remove overlay completely
+    this.overlay.style.display = 'none';
+    
+    // Initialize media player after entering
+    await this.mediaPlayer.init();
   }
 }
 
@@ -231,49 +185,14 @@ class MediaPlayer {
     ];
     this.currentTrack = 0;
     this.isPlaying = false;
+    this.isInitialized = false;
+    this.playPauseBtn = null;
     
     if (autoplay) {
       this.init();
     } else {
-      this.createPlayer(); // Only create the player UI
+      this.createPlayer();
     }
-  }
-
-  async init() {
-    this.createPlayer();
-    await this.initializeAudio();
-    this.playAudio();
-  }
-
-  async initializeAudio() {
-    return new Promise((resolve) => {
-      this.audio.src = this.playlist[this.currentTrack].file;
-      this.audio.volume = 0.5; // Set initial volume to 50%
-
-      this.audio.addEventListener('timeupdate', () => this.updateProgress());
-      this.audio.addEventListener('ended', () => this.onTrackEnd());
-      this.audio.addEventListener('loadedmetadata', () => this.updateDuration());
-
-      // Resolve promise when audio is ready to play
-      this.audio.addEventListener('canplaythrough', () => {
-        resolve();
-      }, { once: true });
-    });
-  }
-
-  playAudio() {
-    // Create context and play on user interaction
-    const playAttempt = setInterval(() => {
-      this.audio.play()
-        .then(() => {
-          this.isPlaying = true;
-          document.querySelector('.play-pause i').className = 'fas fa-pause';
-          clearInterval(playAttempt);
-        })
-        .catch(error => {
-          console.log("Auto-play prevented. Waiting for user interaction.");
-        });
-    }, 2500);
   }
 
   createPlayer() {
@@ -310,38 +229,83 @@ class MediaPlayer {
     `;
     document.body.appendChild(player);
 
+    // Store reference to play/pause button
+    this.playPauseBtn = player.querySelector('.play-pause');
+    
     // Event listeners
-    const playPauseBtn = player.querySelector('.play-pause');
     const volumeSlider = player.querySelector('.volume');
     const progressBar = player.querySelector('.progress-bar');
 
-    playPauseBtn.addEventListener('click', () => this.togglePlay());
+    this.playPauseBtn.addEventListener('click', () => this.togglePlay());
     volumeSlider.addEventListener('input', (e) => this.setVolume(e.target.value));
     progressBar.addEventListener('click', (e) => this.seek(e));
+  }
+
+  async init() {
+    if (this.isInitialized) return;
+    
+    await this.initializeAudio();
+    this.setupEventListeners();
+    this.isInitialized = true;
+    
+    if (!this.isPlaying) {
+      this.playAudio();
+    }
+  }
+
+  setupEventListeners() {
+    this.audio.addEventListener('timeupdate', () => this.updateProgress());
+    this.audio.addEventListener('ended', () => this.onTrackEnd());
+    this.audio.addEventListener('loadedmetadata', () => this.updateDuration());
   }
 
   togglePlay() {
     if (this.isPlaying) {
       this.audio.pause();
       this.isPlaying = false;
-      document.querySelector('.play-pause i').className = 'fas fa-play';
+      if (this.playPauseBtn) {
+        this.playPauseBtn.querySelector('i').className = 'fas fa-play';
+      }
     } else {
       this.audio.play();
       this.isPlaying = true;
-      document.querySelector('.play-pause i').className = 'fas fa-pause';
+      if (this.playPauseBtn) {
+        this.playPauseBtn.querySelector('i').className = 'fas fa-pause';
+      }
     }
   }
 
-  setVolume(value) {
-    this.audio.volume = value / 100;
-    const volumeIcon = document.querySelector('.volume-container i');
-    if (value > 50) {
-      volumeIcon.className = 'fas fa-volume-up';
-    } else if (value > 0) {
-      volumeIcon.className = 'fas fa-volume-down';
-    } else {
-      volumeIcon.className = 'fas fa-volume-mute';
+  playAudio() {
+    this.audio.play()
+      .then(() => {
+        this.isPlaying = true;
+        if (this.playPauseBtn) {
+          this.playPauseBtn.querySelector('i').className = 'fas fa-pause';
+        }
+      })
+      .catch(error => {
+        console.log("Playback prevented. User interaction needed:", error);
+      });
+  }
+
+  onTrackEnd() {
+    this.isPlaying = false;
+    if (this.playPauseBtn) {
+      this.playPauseBtn.querySelector('i').className = 'fas fa-play';
     }
+  }
+
+  async initializeAudio() {
+    return new Promise((resolve) => {
+      this.audio.src = this.playlist[this.currentTrack].file;
+      this.audio.volume = 0.5;
+
+      this.audio.addEventListener('canplaythrough', () => {
+        resolve();
+      }, { once: true });
+
+      this.audio.load();
+    });
   }
 
   updateProgress() {
@@ -369,9 +333,16 @@ class MediaPlayer {
     duration.textContent = this.formatTime(this.audio.duration);
   }
 
-  onTrackEnd() {
-    this.isPlaying = false;
-    document.querySelector('.play-pause i').className = 'fas fa-play';
+  setVolume(value) {
+    this.audio.volume = value / 100;
+    const volumeIcon = document.querySelector('.volume-container i');
+    if (value > 50) {
+      volumeIcon.className = 'fas fa-volume-up';
+    } else if (value > 0) {
+      volumeIcon.className = 'fas fa-volume-down';
+    } else {
+      volumeIcon.className = 'fas fa-volume-mute';
+    }
   }
 }
 

@@ -10,10 +10,26 @@
 </head>
 <body>
   <div class="welcome-overlay">
-    <div class="welcome-card">
-      <h2>Welcome</h2>
-      <p>Enter the digital realm of rosc. - where cybersecurity meets innovation.</p>
-      <button class="welcome-button">Enter Site</button>
+    <div class="welcome-card terminal">
+      <div class="terminal-header">
+        <div class="terminal-buttons">
+          <span class="terminal-button close"></span>
+          <span class="terminal-button minimize"></span>
+          <span class="terminal-button maximize"></span>
+        </div>
+        <div class="terminal-title">root@system</div>
+      </div>
+      <div class="terminal-content">
+        <div class="terminal-line">Welcome to the system, root!</div>
+        <div class="terminal-line warning">
+          <i class="fas fa-triangle-exclamation"></i>
+          WARNING: Any dangerous activity will be logged.
+        </div>
+        <div class="terminal-prompt">
+          <span class="prompt-symbol">$</span>
+          <button class="terminal-button-command">py about_me.py</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -31,12 +47,19 @@
 
     <main class="container">
       <h1 class="typewriter-text">Hi. I am <span class="glow-name">rosc.</span></h1>
-      <p>Cybersecurity Developer – securing the digital world.</p>
+      <div class="loading-container">
+        <div class="loading-text">To be continued</div>
+        <div class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
 
       <div class="links">
-        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
-        <a href="#" aria-label="Discord"><i class="fab fa-discord"></i></a>
-        <a href="#" aria-label="X (Twitter)"><i class="fab fa-x-twitter"></i></a>
+        <a href="https://github.com/r0sc" aria-label="GitHub"><i class="fab fa-github"></i></a>
+        <a href="https://discord.com/users/1178409421102141491" aria-label="Discord"><i class="fab fa-discord"></i></a>
+        <a href="https://x.com/roscexe" aria-label="X (Twitter)"><i class="fab fa-x-twitter"></i></a>
       </div>
     </main>
   </div>
