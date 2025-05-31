@@ -225,8 +225,8 @@ class MediaPlayer {
       {
         title: "Superstar",
         artist: "Sosa La M",
-        cover: "./img/cover.jpg",
-        file: "./music/song.mp3"
+        cover: "../cover.jpg",
+        file: "../song.mp3"
       }
     ];
     this.currentTrack = 0;
