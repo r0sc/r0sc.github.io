@@ -177,8 +177,8 @@ class MediaPlayer {
     this.audio.crossOrigin = "anonymous";
     this.playlist = [
       {
-        title: "Superstar",
-        artist: "Sosa La M",
+        title: "California Love",
+        artist: "Hoti",
         cover: "./img/cover.jpg",
         file: "./music/song.mp3"
       }
@@ -201,7 +201,9 @@ class MediaPlayer {
     player.innerHTML = `
       <div class="player-content">
         <div class="song-info">
-          <img src="${this.playlist[0].cover}" alt="Cover" class="cover-art">
+          <a href="https://www.youtube.com/watch?v=DA756DTN44o&list=RDDA756DTN44o&start_radio=1" target="_blank">
+            <img src="${this.playlist[0].cover}" alt="Hoti auf die 1 🚀" class="cover-art">
+          </a>
           <div class="track-info">
             <div class="track-title">${this.playlist[0].title}</div>
             <div class="track-artist">${this.playlist[0].artist}</div>
@@ -311,9 +313,17 @@ class MediaPlayer {
   updateProgress() {
     const progress = document.querySelector('.progress');
     const currentTime = document.querySelector('.current');
+    const duration = document.querySelector('.duration');
     const percent = (this.audio.currentTime / this.audio.duration) * 100;
     progress.style.width = percent + '%';
     currentTime.textContent = this.formatTime(this.audio.currentTime);
+    // Verbleibende Zeit anzeigen, nur wenn duration bekannt ist
+    if (!isNaN(this.audio.duration) && isFinite(this.audio.duration) && this.audio.duration > 0) {
+      const remaining = this.audio.duration - this.audio.currentTime;
+      duration.textContent = '-' + this.formatTime(remaining);
+    } else {
+      duration.textContent = '-0:00';
+    }
   }
 
   seek(e) {
