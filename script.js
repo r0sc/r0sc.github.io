@@ -5,13 +5,13 @@ canvas.height = window.innerHeight;
 
 const particles = [];
 
-for (let i = 0; i < 75; i++) {
+for (let i = 0; i < 100; i++) {
   particles.push({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
-    radius: Math.random() * 1.2 + 0.8,
-    dx: (Math.random() - 0.5) * 0.3,
-    dy: (Math.random() - 0.5) * 0.3
+    radius: Math.random() * 1.5 + 0.5,
+    dx: (Math.random() - 0.5) * 0.4,
+    dy: (Math.random() - 0.5) * 0.4
   });
 }
 
@@ -25,14 +25,14 @@ function animate() {
     if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
     if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
 
-    const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 2);
-    gradient.addColorStop(0, '#bb33ff44');
+    const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3);
+    gradient.addColorStop(0, '#bb33ff55');
     gradient.addColorStop(0.5, '#66006633');
     gradient.addColorStop(1, '#66006600');
     
     ctx.beginPath();
     ctx.fillStyle = gradient;
-    ctx.arc(p.x, p.y, p.radius * 2, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, p.radius * 3, 0, Math.PI * 2);
     ctx.fill();
   });
 
@@ -46,6 +46,10 @@ window.addEventListener('resize', () => {
   canvas.height = window.innerHeight;
 });
 
+// Loading Screen
+const loadingScreen = document.querySelector('.loading-screen');
+const loadingProgress = document.querySelector('.loading-progress');
+
 // Typewriter effect
 const typewriterText = document.querySelector('.typewriter-text');
 const glowName = typewriterText.querySelector('.glow-name');
@@ -56,7 +60,6 @@ function startTypewriter() {
   let i = 0;
   typewriterText.textContent = '';
   
-  // Recreate the span and add it back to typewriterText
   const newGlowName = document.createElement('span');
   newGlowName.className = 'glow-name';
   typewriterText.appendChild(document.createTextNode(text));
@@ -81,10 +84,10 @@ function startTypewriter() {
       if (currentText.length > 0) {
         currentText = currentText.slice(0, -1);
         newGlowName.textContent = currentText;
-        setTimeout(backspace, 100); // Faster backspace speed
+        setTimeout(backspace, 100);
       } else {
         i = 0;
-        setTimeout(typeForward, 500); // Pause before typing again
+        setTimeout(typeForward, 500);
       }
     }
     
@@ -94,316 +97,171 @@ function startTypewriter() {
   typeForward();
 }
 
-startTypewriter();
+// Video Background Controls
+const bgVideo = document.getElementById('bg-video');
+const muteBtn = document.getElementById('mute-btn');
+const volumeSlider = document.getElementById('volume-slider');
+const volumeControls = document.querySelector('.volume-controls');
 
-// 3D Card Effect
-const container = document.querySelector('.container');
-
-let bounds;
-
-function rotateToMouse(e) {
-  const mouseX = e.clientX;
-  const mouseY = e.clientY;
+// Load video and handle loading screen
+bgVideo.addEventListener('loadeddata', () => {
+  console.log('✅ Video loaded successfully');
+  loadingProgress.textContent = 'Video loaded - Ready!';
   
-  if (!bounds) bounds = container.getBoundingClientRect();
-  
-  const leftX = mouseX - bounds.x;
-  const topY = mouseY - bounds.y;
-  const center = {
-    x: bounds.width / 2,
-    y: bounds.height / 2
-  }
-  
-  const distanceX = leftX - center.x;
-  const distanceY = topY - center.y;
-  
-  const rotateX = (-1) * (distanceY / center.y) * 20;
-  const rotateY = (distanceX / center.x) * 20;
-  
-  container.style.transform = `
-    perspective(1000px)
-    rotateX(${rotateX}deg)
-    rotateY(${rotateY}deg)
-    scale3d(1.05, 1.05, 1.05)
-  `;
-}
-
-container.addEventListener('mouseenter', () => {
-  bounds = container.getBoundingClientRect();
-  document.addEventListener('mousemove', rotateToMouse);
+  setTimeout(() => {
+    loadingScreen.classList.add('hidden');
+    startTypewriter();
+  }, 500);
 });
 
-container.addEventListener('mouseleave', () => {
-  document.removeEventListener('mousemove', rotateToMouse);
-  container.style.transform = `
-    perspective(1000px)
-    rotateX(0deg)
-    rotateY(0deg)
-    scale3d(1, 1, 1)
-  `;
+bgVideo.addEventListener('error', (e) => {
+  console.error('❌ Video loading error:', e);
+  loadingProgress.textContent = 'Error loading video';
+  
+  setTimeout(() => {
+    loadingScreen.classList.add('hidden');
+    startTypewriter();
+  }, 1000);
 });
 
-// Welcome Overlay Handler
-class WelcomeScreen {
-  constructor() {
-    this.overlay = document.querySelector('.welcome-overlay');
-    this.content = document.querySelector('.main-content');
-    this.terminalButton = document.querySelector('.terminal-button-command');
-    this.card = document.querySelector('.welcome-card');
-    this.mediaPlayer = new MediaPlayer(false);
-    
-    this.terminalButton.addEventListener('click', () => this.enterSite());
+bgVideo.addEventListener('progress', () => {
+  if (bgVideo.buffered.length > 0) {
+    const percent = Math.round((bgVideo.buffered.end(0) / bgVideo.duration) * 100);
+    loadingProgress.textContent = `Loading video: ${percent}%`;
   }
+});
 
-  async enterSite() {
-    // Add fade out animation
-    this.overlay.style.opacity = '0';
-    this.content.classList.add('active');
-    
-    // Wait for animation to complete
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Remove overlay completely
-    this.overlay.style.display = 'none';
-    
-    // Initialize media player after entering
-    await this.mediaPlayer.init();
+// Set initial volume to 50%
+bgVideo.volume = 0.5;
+volumeSlider.value = 50;
+
+// Mute/Unmute functionality
+muteBtn.addEventListener('click', () => {
+  bgVideo.muted = !bgVideo.muted;
+  const icon = muteBtn.querySelector('i');
+  icon.className = bgVideo.muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+});
+
+// Volume slider
+volumeSlider.addEventListener('input', (e) => {
+  const volume = e.target.value / 100;
+  bgVideo.volume = volume;
+  
+  if (volume > 0) {
+    bgVideo.muted = false;
   }
-}
+  
+  const icon = muteBtn.querySelector('i');
+  if (volume === 0) {
+    icon.className = 'fas fa-volume-mute';
+  } else if (volume < 0.5) {
+    icon.className = 'fas fa-volume-down';
+  } else {
+    icon.className = 'fas fa-volume-up';
+  }
+});
 
-class MediaPlayer {
-  constructor(autoplay = false) {
-    this.audio = new Audio();
-    this.audio.crossOrigin = "anonymous";
-    this.playlist = [
-      {
-        title: "California Love",
-        artist: "Hoti",
-        cover: "./img/cover.jpg",
-        file: "./music/song.mp3"
-      }
-    ];
-    this.currentTrack = 0;
-    this.isPlaying = false;
-    this.isInitialized = false;
-    this.playPauseBtn = null;
+// Welcome overlay handler
+document.querySelector('.terminal-button-command').addEventListener('click', () => {
+  const welcomeOverlay = document.querySelector('.welcome-overlay');
+  const mainContent = document.querySelector('.main-content');
+  
+  // Fade out overlay
+  welcomeOverlay.style.opacity = '0';
+  
+  setTimeout(() => {
+    welcomeOverlay.style.display = 'none';
+    mainContent.classList.remove('content-blur');
     
-    if (autoplay) {
-      this.init();
-    } else {
-      this.createPlayer();
-    }
-  }
-
-  createPlayer() {
-    const player = document.createElement('div');
-    player.className = 'media-player';
-    player.innerHTML = `
-      <div class="player-content">
-        <div class="song-info">
-          <a href="https://www.youtube.com/watch?v=DA756DTN44o&list=RDDA756DTN44o&start_radio=1" target="_blank">
-            <img src="${this.playlist[0].cover}" alt="Hoti auf die 1 🚀" class="cover-art">
-          </a>
-          <div class="track-info">
-            <div class="track-title">${this.playlist[0].title}</div>
-            <div class="track-artist">${this.playlist[0].artist}</div>
-          </div>
-        </div>
-        <div class="playback-controls">
-          <button class="play-pause">
-            <i class="fas fa-play"></i>
-          </button>
-          <div class="progress-container">
-            <div class="progress-bar">
-              <div class="progress"></div>
-            </div>
-            <div class="time">
-              <span class="current">0:00</span>
-              <span class="duration">0:00</span>
-            </div>
-          </div>
-        </div>
-        <div class="volume-container">
-          <i class="fas fa-volume-down"></i>
-          <input type="range" class="volume" min="0" max="100" value="50">
-        </div>
-      </div>
-    `;
-    document.body.appendChild(player);
-
-    // Store reference to play/pause button
-    this.playPauseBtn = player.querySelector('.play-pause');
+    // Unmute and start video playback with 50% volume
+    bgVideo.muted = false;
+    bgVideo.volume = 0.5;
+    volumeSlider.value = 50;
     
-    // Event listeners
-    const volumeSlider = player.querySelector('.volume');
-    const progressBar = player.querySelector('.progress-bar');
-
-    this.playPauseBtn.addEventListener('click', () => this.togglePlay());
-    volumeSlider.addEventListener('input', (e) => this.setVolume(e.target.value));
-    progressBar.addEventListener('click', (e) => this.seek(e));
-  }
-
-  async init() {
-    if (this.isInitialized) return;
-    
-    await this.initializeAudio();
-    this.setupEventListeners();
-    this.isInitialized = true;
-    
-    if (!this.isPlaying) {
-      this.playAudio();
-    }
-  }
-
-  setupEventListeners() {
-    this.audio.addEventListener('timeupdate', () => this.updateProgress());
-    this.audio.addEventListener('ended', () => this.onTrackEnd());
-    this.audio.addEventListener('loadedmetadata', () => this.updateDuration());
-  }
-
-  togglePlay() {
-    if (this.isPlaying) {
-      this.audio.pause();
-      this.isPlaying = false;
-      if (this.playPauseBtn) {
-        this.playPauseBtn.querySelector('i').className = 'fas fa-play';
-      }
-    } else {
-      this.audio.play();
-      this.isPlaying = true;
-      if (this.playPauseBtn) {
-        this.playPauseBtn.querySelector('i').className = 'fas fa-pause';
-      }
-    }
-  }
-
-  playAudio() {
-    this.audio.play()
+    bgVideo.play()
       .then(() => {
-        this.isPlaying = true;
-        if (this.playPauseBtn) {
-          this.playPauseBtn.querySelector('i').className = 'fas fa-pause';
-        }
+        console.log('🎬 Video is now playing with audio');
+        bgVideo.classList.add('active');
+        volumeControls.classList.add('visible');
+        
+        const icon = muteBtn.querySelector('i');
+        icon.className = 'fas fa-volume-up';
+        
+        // Trigger animations in sequence
+        const techStack = document.querySelector('.tech-stack');
+        const interests = document.querySelector('.interests');
+        const stats = document.querySelector('.stats');
+        const links = document.querySelector('.links');
+        
+        // 1. Tech Stack (0ms)
+        setTimeout(() => {
+          if (techStack) techStack.classList.add('visible');
+        }, 100);
+        
+        // 2. Cybersecurity Focus (400ms nach Tech Stack)
+        setTimeout(() => {
+          if (interests) interests.classList.add('visible');
+        }, 500);
+        
+        // 3. Current Status (400ms nach Cybersecurity)
+        setTimeout(() => {
+          if (stats) stats.classList.add('visible');
+        }, 900);
+        
+        // 4. Social Media Links (400ms nach Current Status)
+        setTimeout(() => {
+          if (links) {
+            links.style.opacity = '0';
+            links.style.transform = 'translateX(100px)';
+            links.style.transition = 'all 0.6s ease';
+            
+            setTimeout(() => {
+              links.style.opacity = '1';
+              links.style.transform = 'translateX(0)';
+            }, 50);
+          }
+        }, 1300);
       })
       .catch(error => {
-        console.log("Playback prevented. User interaction needed:", error);
+        console.error('❌ Video play error:', error);
       });
-  }
+  }, 500);
+});
 
-  onTrackEnd() {
-    this.isPlaying = false;
-    if (this.playPauseBtn) {
-      this.playPauseBtn.querySelector('i').className = 'fas fa-play';
-    }
-  }
+// View Counter
+const COUNTER_KEY = 'rosc_view_count';
 
-  async initializeAudio() {
-    return new Promise((resolve) => {
-      this.audio.src = this.playlist[this.currentTrack].file;
-      this.audio.volume = 0.5;
-
-      this.audio.addEventListener('canplaythrough', () => {
-        resolve();
-      }, { once: true });
-
-      this.audio.load();
-    });
-  }
-
-  updateProgress() {
-    const progress = document.querySelector('.progress');
-    const currentTime = document.querySelector('.current');
-    const duration = document.querySelector('.duration');
-    const percent = (this.audio.currentTime / this.audio.duration) * 100;
-    progress.style.width = percent + '%';
-    currentTime.textContent = this.formatTime(this.audio.currentTime);
-    // Verbleibende Zeit anzeigen, nur wenn duration bekannt ist
-    if (!isNaN(this.audio.duration) && isFinite(this.audio.duration) && this.audio.duration > 0) {
-      const remaining = this.audio.duration - this.audio.currentTime;
-      duration.textContent = '-' + this.formatTime(remaining);
-    } else {
-      duration.textContent = '-0:00';
-    }
-  }
-
-  seek(e) {
-    const progressBar = document.querySelector('.progress-bar');
-    const percent = e.offsetX / progressBar.offsetWidth;
-    this.audio.currentTime = percent * this.audio.duration;
-  }
-
-  formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    seconds = Math.floor(seconds % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  }
-
-  updateDuration() {
-    const duration = document.querySelector('.duration');
-    duration.textContent = this.formatTime(this.audio.duration);
-  }
-
-  setVolume(value) {
-    this.audio.volume = value / 100;
-    const volumeIcon = document.querySelector('.volume-container i');
-    if (value > 50) {
-      volumeIcon.className = 'fas fa-volume-up';
-    } else if (value > 0) {
-      volumeIcon.className = 'fas fa-volume-down';
-    } else {
-      volumeIcon.className = 'fas fa-volume-mute';
-    }
-  }
+function getViewCount() {
+  const count = localStorage.getItem(COUNTER_KEY);
+  return count ? parseInt(count) : 0;
 }
 
-// Initialize welcome screen
-document.addEventListener('DOMContentLoaded', () => {
-  new WelcomeScreen();
-});
-
-// Media Player 3D Effect
-const mediaPlayer = document.querySelector('.media-player');
-let mediaPlayerBounds;
-
-function rotateMediaPlayer(e) {
-  const mouseX = e.clientX;
-  const mouseY = e.clientY;
-  
-  if (!mediaPlayerBounds) mediaPlayerBounds = mediaPlayer.getBoundingClientRect();
-  
-  const leftX = mouseX - mediaPlayerBounds.x;
-  const topY = mouseY - mediaPlayerBounds.y;
-  const center = {
-    x: mediaPlayerBounds.width / 2,
-    y: mediaPlayerBounds.height / 2
-  }
-  
-  const distanceX = leftX - center.x;
-  const distanceY = topY - center.y;
-  
-  const rotateX = (-1) * (distanceY / center.y) * 10;
-  const rotateY = (distanceX / center.x) * 10;
-  
-  mediaPlayer.style.transform = `
-    perspective(1000px)
-    rotateX(${rotateX}deg)
-    rotateY(${rotateY}deg)
-    scale3d(1.02, 1.02, 1.02)
-  `;
+function incrementViewCount() {
+  let count = getViewCount();
+  count++;
+  localStorage.setItem(COUNTER_KEY, count.toString());
+  return count;
 }
 
-mediaPlayer.addEventListener('mouseenter', () => {
-  mediaPlayerBounds = mediaPlayer.getBoundingClientRect();
-  document.addEventListener('mousemove', rotateMediaPlayer);
-});
+function animateCounter(target) {
+  const counterElement = document.getElementById('view-count');
+  let current = 0;
+  const increment = target / 50;
+  const duration = 2000;
+  const stepTime = duration / 50;
+  
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) {
+      counterElement.textContent = target.toLocaleString();
+      clearInterval(timer);
+    } else {
+      counterElement.textContent = Math.floor(current).toLocaleString();
+    }
+  }, stepTime);
+}
 
-mediaPlayer.addEventListener('mouseleave', () => {
-  document.removeEventListener('mousemove', rotateMediaPlayer);
-  mediaPlayer.style.transform = `
-    perspective(1000px)
-    rotateX(0deg)
-    rotateY(0deg)
-    scale3d(1, 1, 1)
-  `;
-});
+// Initialize counter
+const viewCount = incrementViewCount();
+animateCounter(viewCount);
 

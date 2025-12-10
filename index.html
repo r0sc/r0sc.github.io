@@ -7,8 +7,36 @@
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
 </head>
 <body>
+  <!-- Loading Screen -->
+  <div class="loading-screen">
+    <div class="loader"></div>
+    <div class="loading-screen-text">Loading...</div>
+    <div class="loading-progress">Initializing...</div>
+  </div>
+
+  <!-- Video Background -->
+  <video id="bg-video" class="bg-video" muted loop playsinline preload="auto">
+    <source src="music/wallahi_good.mp4" type="video/mp4">
+  </video>
+
+  <!-- Volume Controls -->
+  <div class="volume-controls">
+    <button id="mute-btn" class="volume-btn">
+      <i class="fas fa-volume-up"></i>
+    </button>
+    <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="50">
+  </div>
+
+  <!-- View Counter -->
+  <div class="view-counter">
+    <i class="fas fa-eye"></i>
+    <span class="counter-number" id="view-count">0</span>
+  </div>
+
+  <!-- Welcome Overlay -->
   <div class="welcome-overlay">
     <div class="welcome-card terminal">
       <div class="terminal-header">
@@ -33,6 +61,7 @@
     </div>
   </div>
 
+  <!-- Main Content -->
   <div class="main-content content-blur">
     <canvas id="bg"></canvas>
 
@@ -47,12 +76,73 @@
 
     <main class="container">
       <h1 class="typewriter-text">Hi. I am <span class="glow-name">rosc.</span></h1>
-      <div class="loading-container">
-        <div class="loading-text">To be continued</div>
-        <div class="loading-dots">
-          <span></span>
-          <span></span>
-          <span></span>
+      
+      <!-- About Me Section -->
+      <div class="about-section">
+        <!-- Tech Stack -->
+        <div class="about-block tech-stack">
+          <div class="block-header">
+            <i class="fas fa-code"></i>
+            <span>Tech Stack</span>
+          </div>
+          <div class="tech-icons">
+            <div class="tech-icon" data-tooltip="Java">
+              <i class="devicon-java-plain colored"></i>
+            </div>
+            <div class="tech-icon" data-tooltip="C#">
+              <i class="devicon-csharp-plain colored"></i>
+            </div>
+            <div class="tech-icon" data-tooltip="Node.js">
+              <i class="devicon-nodejs-plain colored"></i>
+            </div>
+            <div class="tech-icon" data-tooltip="CSS3">
+              <i class="devicon-css3-plain colored"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interests -->
+        <div class="about-block interests">
+          <div class="block-header">
+            <i class="fas fa-shield-halved"></i>
+            <span>Cybersecurity Focus</span>
+          </div>
+          <div class="interest-list">
+            <div class="interest-item">
+              <i class="fas fa-bug"></i>
+              <span>Reverse Engineering</span>
+            </div>
+            <div class="interest-item">
+              <i class="fas fa-globe"></i>
+              <span>Web Security</span>
+            </div>
+            <div class="interest-item">
+              <i class="fas fa-magnifying-glass"></i>
+              <span>OSINT</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="about-block stats">
+          <div class="block-header">
+            <i class="fas fa-terminal"></i>
+            <span>Current Status</span>
+          </div>
+          <div class="status-list">
+            <div class="status-item">
+              <span class="status-indicator"></span>
+              <span>Available for projects</span>
+            </div>
+            <div class="status-item">
+              <span class="status-indicator"></span>
+              <span>Skidding with <span class="status-heart">❤️</span></span>
+            </div>
+            <div class="status-item">
+              <span class="status-indicator"></span>
+              <span>CTF enthusiast</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -62,6 +152,13 @@
         <a href="https://x.com/roscexe" aria-label="X (Twitter)"><i class="fab fa-x-twitter"></i></a>
       </div>
     </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        Made with <span class="footer-heart">❤️</span> for ragebating
+      </div>
+    </footer>
   </div>
   
   <script src="script.js"></script>
